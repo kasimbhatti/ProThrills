@@ -33,6 +33,9 @@ class Game3D:
             self.player = 1
         return None
 
+    def return_player(self):
+        return self.player
+
     def height_full(self, r, c):
         tf = True
         for i in range(self.rows):
@@ -51,6 +54,9 @@ class Game3D:
         if idx >= 0:
             self.board[r][c][idx] = player
         return idx
+
+    def newTurn(self, r, c, h):
+        return self.check_score(r, c, h)
 
     def check_full_score(self):
         if self.row_score(self.board, self.rows, self.cols, self.height) == 1:
