@@ -94,36 +94,47 @@ class Game3D:
         for a in range(min(4, r_dist + 1)):
             for b in range(min(4, c_dist + 1)):
                 for c in range(min(4, h_dist + 1)):
-                    new_board = self.copy_board(r_target, c_target, h_target, a, b, c, 3, 3, 3)
-                    if self.row_score(new_board, 4, 4, 4) == 1:  # If 4 are connected in a row
-                        return 1  # Win state
-                    if self.col_score(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.height_score(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score1(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score2(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score3(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score3(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score4(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score5(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.diagonal_score6(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.super_diagonal1(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.super_diagonal2(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.super_diagonal3(new_board, 4, 4, 4) == 1:
-                        return 1
-                    if self.super_diagonal4(new_board, 4, 4, 4) == 1:
-                        return 1
-        return 0
+                    (new_board, O) = self.copy_board(r_target, c_target, h_target, a, b, c, 3, 3, 3)
+                    (win, first, last) = self.row_score(new_board, 4, 4, 4, O)
+                    if win == 1:  # If 4 are connected in a row
+                        return 1, [first, last]  # Win state
+                    (win, first, last) = self.col_score(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.height_score(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score1(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score2(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score3(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score4(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score5(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.diagonal_score6(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.super_diagonal1(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.super_diagonal2(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.super_diagonal3(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+                    (win, first, last) = self.super_diagonal4(new_board, 4, 4, 4, O)
+                    if win == 1:
+                        return 1, [first, last]
+        return 0, [[0, 0, 0], [0, 0, 0]]
 
     def copy_board(self, r_target, c_target, h_target, a, b, c, r_dist, c_dist, h_dist):
 
@@ -131,9 +142,11 @@ class Game3D:
         for i in range(0, 4):
             for j in range(0, 4):
                 for k in range(0, 4):
+                    if (i, j, k) == (0, 0, 0):
+                        O = [i + r_target + a - r_dist, j + c_target + b - c_dist, k + h_target + c - h_dist]
                     new_board[i][j][k] = copy.deepcopy(self.board[i + r_target + a - r_dist][j + c_target + b - c_dist][k + h_target + c - h_dist])
 
-        return new_board
+        return new_board, O
 
     def full(self):
         tf = False
@@ -143,21 +156,26 @@ class Game3D:
                     tf = tf or (self.board[i][j][k] == 0)
         return not tf
 
-    def col_score(self, board, row, col, height):
+    def col_score(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for h in range(height):
             for i in range(row):
                 count = 0
+                first = [O[0] + i, O[1], O[2] + h]
                 for j in range(col):
                     if board[i][j][h] == self.player:
                         count += 1
                     else:
                         count = 0
                     if count == 4:
+                        last = [O[0] + i, O[1] + j, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        for r in range(row):
+                        return 1, first, last
+        for i in range(row):
             for h in range(height):
                 count = 0
+                first = [O[0] + i, O[1], O[2] + h]
                 for j in range(col):
                     if board[i][j][h] == self.player:
                         count += 1
@@ -165,64 +183,80 @@ class Game3D:
                         count = 0
                     if count == 4:
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        last = [O[0] + i, O[1] + j, O[2] + h]
+                        return 1, first, last
+        return 0, first, last
 
-    def row_score(self, board, row, col, height):
+    def row_score(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for h in range(height):
             for j in range(col):
                 count = 0
+                first = [O[0], O[1] + j, O[2] + h]
                 for i in range(row):
                     if board[i][j][h] == self.player:
                         count += 1
                     else:
                         count = 0
                     if count == 4:
+                        last = [O[0] + i, O[1] + j, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
         for j in range(col):
             for h in range(height):
                 count = 0
+                first = [O[0], O[1] + j, O[2] + h]
                 for i in range(row):
                     if board[i][j][h] == self.player:
                         count += 1
                     else:
                         count = 0
                     if count == 4:
+                        last = [i, j, h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def height_score(self, board, row, col, height):
+    def height_score(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for i in range(row):
             for j in range(col):
                 count = 0
+                first = [O[0] + i, O[1] + j, O[2]]
                 for h in range(height):
                     if board[i][j][h] == self.player:
                         count += 1
                     else:
                         count = 0
                     if count == 4:
+                        last = [O[0] + i, O[1] + j, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
         for j in range(col):
             for i in range(row):
                 count = 0
+                first = [O[0] + i, O[1] + j, O[2]]
                 for h in range(height):
                     if board[i][j][h] == self.player:
                         count += 1
                     else:
                         count = 0
                     if count == 4:
+                        last = [O[0] + i, O[1] + j, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score1(self, board, row, col, height):
+    def diagonal_score1(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for h in range(height):
             for r in range(row):
                 count = 0
                 c = 0
+                first = first = [O[0] + r, O[1] + c, O[2] + h]
                 while r <= row - 1 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -231,11 +265,13 @@ class Game3D:
                     r += 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
             for c in range(col):
                 count = 0
-                r = 0
+                r =0
+                first = first = [O[0] + r, O[1] + c, O[2] + h]
                 while r <= row - 1 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -244,15 +280,19 @@ class Game3D:
                     r += 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score2(self, board, row, col, height):
+    def diagonal_score2(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for h in range(height):
             for r in range(row - 1, -1, -1):
                 count = 0
                 c = 0
+                first = first = [O[0] + r, O[1] + c, O[2] + h]
                 while r >= 0 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -261,12 +301,14 @@ class Game3D:
                     r -= 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
 
             for c in range(col):
                 count = 0
                 r = row - 1
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while r >= 0 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -275,15 +317,19 @@ class Game3D:
                     r -= 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score3(self, board, row, col, height):
+    def diagonal_score3(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row):
             for h in range(height):
                 count = 0
                 c = 0
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while h <= height - 1 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -293,7 +339,7 @@ class Game3D:
                     c += 1
                     if count == 4:
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
             for c in range(col):
                 count = 0
                 h = 0
@@ -306,14 +352,17 @@ class Game3D:
                     c += 1
                     if count == 4:
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score4(self, board, row, col, height):
+    def diagonal_score4(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row):
             for h in range(height - 1, -1, -1):
                 count = 0
                 c = 0
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while h >= 0 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -322,12 +371,14 @@ class Game3D:
                     h -= 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
 
             for c in range(col):
                 count = 0
                 h = height - 1
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while h >= 0 and c <= col - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -336,15 +387,19 @@ class Game3D:
                     h -= 1
                     c += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score5(self, board, row, col, height):
+    def diagonal_score5(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for c in range(col):
             for r in range(row):
                 count = 0
                 h = 0
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while r <= row - 1 and h <= height - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -353,11 +408,13 @@ class Game3D:
                     r += 1
                     h += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
             for h in range(height):
                 count = 0
                 r = 0
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while r <= row - 1 and h <= height - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -366,15 +423,19 @@ class Game3D:
                     r += 1
                     h += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def diagonal_score6(self, board, row, col, height):
+    def diagonal_score6(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for c in range(col):
             for h in range(height - 1, -1, -1):
                 count = 0
                 r = 0
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while h >= 0 and r <= row - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -383,12 +444,14 @@ class Game3D:
                     h -= 1
                     r += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
+                        return 1, first, last
 
             for r in range(row):
                 count = 0
                 h = height - 1
+                first = [O[0] + r, O[1] + c, O[2] + h]
                 while h >= 0 and r <= row - 1:
                     if board[r][c][h] == self.player:
                         count += 1
@@ -397,15 +460,19 @@ class Game3D:
                     h -= 1
                     r += 1
                     if count == 4:
+                        last = [O[0] + r, O[1] + c, O[2] + h]
                         print("Player %d wins!" % self.player)
-                        return 1
-        return 0
+                        return 1, first, last
+        return 0, first, last
 
-    def super_diagonal1(self, board, row, col, height):
+    def super_diagonal1(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row):
             count = 0
             c = 0
             h = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -415,12 +482,14 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for c in range(col):
             count = 0
             r = 0
             h = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -430,12 +499,14 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for h in range(height):
             count = 0
             r = 0
             c = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -445,15 +516,19 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
-        return 0
+                    return 1, first, last
+        return 0, first, last
 
-    def super_diagonal2(self, board, row, col, height):
+    def super_diagonal2(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row - 1, -1, -1):
             count = 0
             c = 0
             h = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -463,12 +538,14 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for c in range(col):
             count = 0
             r = row - 1
             h = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -478,12 +555,14 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for h in range(height):
             count = 0
             r = row - 1
             c = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h <= height -1:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -493,15 +572,19 @@ class Game3D:
                 c += 1
                 h += 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
-        return 0
+                    return 1, first, last
+        return 0, first, last
 
-    def super_diagonal3(self, board, row, col, height):
+    def super_diagonal3(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row):
             count = 0
             c = 0
             h = height - 1
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -511,12 +594,14 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for c in range(col):
             count = 0
             r = 0
             h = height - 1
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -526,12 +611,14 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for h in range(height - 1, -1, -1):
             count = 0
             r = 0
             c = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r <= row - 1 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -541,15 +628,19 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
-        return 0
+                    return 1, first, last
+        return 0, first, last
 
-    def super_diagonal4(self, board, row, col, height):
+    def super_diagonal4(self, board, row, col, height, O):
+        first = [0, 0, 0]
+        last = [0, 0, 0]
         for r in range(row - 1, -1, -1):
             count = 0
             c = 0
             h = height - 1
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -559,12 +650,14 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for c in range(col):
             count = 0
             r = row - 1
             h = height - 1
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -574,12 +667,14 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
+                    return 1, first, last
         for h in range(height - 1, -1, -1):
             count = 0
             r = row - 1
             c = 0
+            first = [O[0] + r, O[1] + c, O[2] + h]
             while r >= 0 and c <= col - 1 and h >= 0:
                 if board[r][c][h] == self.player:
                     count += 1
@@ -589,9 +684,10 @@ class Game3D:
                 c += 1
                 h -= 1
                 if count == 4:
+                    last = [O[0] + r, O[1] + c, O[2] + h]
                     print("Player %d wins!" % self.player)
-                    return 1
-        return 0
+                    return 1, first, last
+        return 0, first, last
 
     def row_edge_dist(self, r):
         return min(r, self.rows - 1 - r)
