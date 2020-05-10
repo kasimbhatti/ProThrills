@@ -1,9 +1,8 @@
-from encodings import johab
-
 import glfw
 from Renderer import Renderer
 import math as m
 from ObjectLibrary import ObjectLibrary
+from Game3D import Game3D
 
 
 def multiplyQuaternions(QuatL, QuatR):
@@ -21,19 +20,22 @@ def normalizeQuaternion(Quat):
     return NewQuat
 
 
-def clicked(window, KEY, last):
-    entered = False
-    if glfw.get_key(window, KEY) == glfw.PRESS:
-        if not last:
-            entered = True
-        last = True
+def clicked(window, KEY, last, override):
+    if override:
+        entered = False
     else:
-        last = False
+        entered = False
+        if glfw.get_key(window, KEY) == glfw.PRESS:
+            if not last:
+                entered = True
+            last = True
+        else:
+            last = False
     return [entered, last]
 
 
-def receiveInputCounter(window, number, KEY, last, currentNumber):
-    enterList = clicked(window, KEY, last)
+def receiveInputCounter(window, number, KEY, last, currentNumber, override):
+    enterList = clicked(window, KEY, last, override)
     last = enterList[1]
     entered = enterList[0]
     if entered:
@@ -46,6 +48,40 @@ def receiveInputCounter(window, number, KEY, last, currentNumber):
 
 
 def main():
+    rows = 0
+    columns = 0
+    height = 0
+    while rows < 5 or columns < 5 or height < 5:
+        print("The board should be at least 5 x 5 x 5 !  Make sure your inputs are numeric")
+        try:
+            rows = int(input("Enter an odd number of rows: "))
+            columns = int(input("Enter an odd number of columns: "))
+            height = int(input("Enter an odd number of layers: "))
+        except ValueError:
+            rows = 0
+            columns = 0
+            height = 0
+    if rows % 2 == 0:
+        rows += 1
+    if columns % 2 == 0:
+        columns += 1
+    if height % 2 == 0:
+        height += 1
+    print("Game initiated with size " + str(rows) + " x " + str(columns) + " x " + str(height))
+    print("")
+    print("Use the mouse whilst holding the left click button to rotate the arena")
+    print("Use the WASD keys to control movement of the arena")
+    print("When selecting a place for your counter, type the row number first, and click enter, then type the column number next, and click enter. If the rows and"
+          " columns chosen are valid, then the counter will be placed in the bottom layer")
+    print("If a counter is already placed in that position in the layer, then the counter will be placed one layer higher than it")
+    print("Connect 4's can be found in all 3 dimensions, so watch out for diagonal connects between layers!")
+    print("Once a connect has been made, the game will end and a white line will display the positions of the connected counters on the screen")
+    print("Good luck and remember to have fun!")
+
+    print("Graphics by Kasim Rehman Bhatti, game mechanics by Atharva Vadeyar, server hosting by Tillega Narayanan")
+    print("This game was created using Python for both the machnics and graphics of the game. The graphics work by using Modern OpenGL")
+    NewGame = Game3D(rows, columns, height)
+
     WindowName = "OpenGL Testing"
     if not glfw.init():
         return
@@ -78,20 +114,10 @@ def main():
     CurrentQuaternion = [0, 0, 0, 1]
     First = True
 
-    rows = 3
-    columns = 5
-    height = 4
-
-    if rows % 2 == 0:
-        rows += 1
-    if columns % 2 == 0:
-        columns += 1
-    if height % 2 == 0:
-        height += 1
-
     multiplier = (rows * columns) / 40
     if (rows * columns) < 40:
         multiplier = 1
+
     radius = 0.27
     depth = 0.05
     accuracy = 60
@@ -100,11 +126,6 @@ def main():
     rotationCentre = [0, 0, -4]
     texture = 2
     color = [0, 0, 0.4]
-
-    counterArray = [[[-1 for k in range(0, int(height))] for j in range(-int(columns / 2), int(columns / 2) + 1)] for i
-                    in
-                    range(-int(rows / 2), int(rows / 2) + 1)]
-
     counterTexture = 3
     counterColor1 = [0.7, 0, 0]
     counterColor2 = [0.7, 0.7, 0]
@@ -193,19 +214,22 @@ def main():
 
     Done = False
 
-    playerTurn = 1
-
-    currentNumberBuffer = [-1, -1, -1]
     currentNumber = -1
+    currentNumberBuffer = [-1, -1]
+
     lastBackspace = False
     lastEnter = False
     currentIndex = 0
     last = [False, False, False, False, False, False, False, False, False, False]
     lastclicked = False
 
-    connectFound = True
-    startBuffer = [1, 1, 1]
-    endBuffer = [3, 3, 3]
+    connectFound = False
+    startBuffer = [-1, -1, -1]
+    endBuffer = [-1, -1, -1]
+
+    NewGame.show_state()
+
+    override = False
 
     while not glfw.window_should_close(window) and not Done:
         NewRender.ProjectAndStretch(FOVradians, Near, Far, Scale, ScaledRatio)
@@ -225,11 +249,11 @@ def main():
         if glfw.get_key(window, glfw.KEY_L) == glfw.PRESS:
             ChangeTZ += Change
 
-        enterList = clicked(window, glfw.KEY_ENTER, lastEnter)
+        enterList = clicked(window, glfw.KEY_ENTER, lastEnter, override)
         lastEnter = enterList[1]
         enter = enterList[0]
 
-        enterList = clicked(window, glfw.KEY_BACKSPACE, lastBackspace)
+        enterList = clicked(window, glfw.KEY_BACKSPACE, lastBackspace, override)
         lastBackspace = enterList[1]
         backspace = enterList[0]
         if backspace:
@@ -240,7 +264,7 @@ def main():
                 currentNumber = int(currentNumber)
 
         for i in range(0, 10):
-            enterList = receiveInputCounter(window, 0 + i, glfw.KEY_0 + i, last[i], currentNumber)
+            enterList = receiveInputCounter(window, 0 + i, glfw.KEY_0 + i, last[i], currentNumber, override)
             currentNumber = enterList[2]
             last[i] = enterList[1]
 
@@ -250,35 +274,66 @@ def main():
                 currentIndex += 1
                 currentNumber = -1
 
-        if currentIndex == 3:
+        if currentIndex == 2:
             currentIndex = 0
 
-        if currentNumberBuffer[0] != -1 and currentNumberBuffer[1] != -1 and currentNumberBuffer[2] != -1:
+        if currentNumberBuffer[0] != -1 and currentNumberBuffer[1] != -1 and not connectFound:
+            EnteredRow = False
+            EnteredColumn = False
             if currentNumberBuffer[0] > rows - 1:
-                currentNumberBuffer[0] = rows - 1
-            if currentNumberBuffer[1] > columns - 1:
-                currentNumberBuffer[1] = columns - 1
-            if currentNumberBuffer[2] > height - 1:
-                currentNumberBuffer[2] = height - 1
-            value = counterArray[currentNumberBuffer[0]][currentNumberBuffer[1]][currentNumberBuffer[2]]
-            if value == -1:
-                counterArray[currentNumberBuffer[0]][currentNumberBuffer[1]][currentNumberBuffer[2]] = playerTurn
-                if playerTurn == 1:
-                    counterColor = counterColor1
-                    playerTurn = 2
-                else:
-                    counterColor = counterColor2
-                    playerTurn = 1
-                NewObjectLibrary.CreateCylinder(radius, depth, accuracy,
-                                                objectCentre[0] + ((currentNumberBuffer[0] - int(rows / 2)) * length),
-                                                objectCentre[1] + (currentNumberBuffer[2] * multiplier),
-                                                objectCentre[2] + (
-                                                            (currentNumberBuffer[1] - int(columns / 2)) * length),
-                                                rotationCentre[0],
-                                                rotationCentre[1], rotationCentre[2], counterColor, counterTexture)
-                NewObjectLibrary.sortVertices()
+                print("invalid row")
             else:
-                currentNumberBuffer = [-1, -1, -1]
+                EnteredRow = True
+            if currentNumberBuffer[1] > columns - 1:
+                print("invalid column")
+            else:
+                EnteredColumn = True
+
+            initialPlayer = NewGame.return_player()
+            if EnteredRow and EnteredColumn:
+                added = NewGame.add(currentNumberBuffer[0], currentNumberBuffer[1], initialPlayer)
+                newHeight = height - (added + 1)
+
+                (turn, arrays) = NewGame.newTurn(currentNumberBuffer[0], currentNumberBuffer[1], newHeight)
+                if turn == 1:
+                    connectFound = True
+                    startBuffer = arrays[0]
+                    startBuffer[2] = -(startBuffer[2] + 1)
+                    endBuffer = arrays[1]
+                    endBuffer[2] = -(endBuffer[2] + 1)
+                    print(startBuffer)
+                    print(endBuffer)
+
+                if added != -1 and added != -2:
+                    if initialPlayer == 1:
+                        counterColor = counterColor1
+                    else:
+                        counterColor = counterColor2
+
+                    NewObjectLibrary.CreateCylinder(radius, depth, accuracy,
+                                                    objectCentre[0] + (
+                                                            (currentNumberBuffer[0] - int(rows / 2)) * length),
+                                                    objectCentre[1] + (newHeight * multiplier),
+                                                    objectCentre[2] + (
+                                                            (currentNumberBuffer[1] - int(columns / 2)) * length),
+                                                    rotationCentre[0],
+                                                    rotationCentre[1], rotationCentre[2], counterColor, counterTexture)
+                    NewObjectLibrary.sortVertices()
+
+                    NewGame.player_switch()
+
+                    print("")
+                    print("New state")
+                    NewGame.show_state()
+
+                    currentNumber = -1
+                    currentNumberBuffer = [-1, -1]
+
+                else:
+                    currentNumberBuffer = [-1, -1]
+            else:
+                currentNumber = -1
+                currentNumberBuffer = [-1, -1]
 
         if connectFound:
             if startBuffer[0] != -1 and startBuffer[1] != -1 and startBuffer[2] != -1:
@@ -298,24 +353,23 @@ def main():
                         endBuffer[2] = height - 1
 
                 a = [objectCentre[0] + ((startBuffer[0] - int(rows / 2)) * length),
-                     objectCentre[1] + (startBuffer[2] * multiplier),
+                     objectCentre[1] + (startBuffer[2] * multiplier) + 0.2,
                      objectCentre[2] + ((startBuffer[1] - int(columns / 2)) * length + 0.05)]
                 b = [objectCentre[0] + ((startBuffer[0] - int(rows / 2)) * length),
-                     objectCentre[1] + (startBuffer[2] * multiplier),
+                     objectCentre[1] + (startBuffer[2] * multiplier) + 0.2,
                      objectCentre[2] + ((startBuffer[1] - int(columns / 2)) * length - 0.05)]
                 d = [objectCentre[0] + ((endBuffer[0] - int(rows / 2)) * length),
-                     objectCentre[1] + (endBuffer[2] * multiplier),
+                     objectCentre[1] + (endBuffer[2] * multiplier) + 0.2,
                      objectCentre[2] + ((endBuffer[1] - int(columns / 2)) * length + 0.05)]
                 c = [objectCentre[0] + ((endBuffer[0] - int(rows / 2)) * length),
-                     objectCentre[1] + (endBuffer[2] * multiplier),
+                     objectCentre[1] + (endBuffer[2] * multiplier) + 0.2,
                      objectCentre[2] + ((endBuffer[1] - int(columns / 2)) * length - 0.05)]
-                NewObjectLibrary.CreateRectangle(a, b, c, d, objectCentre[0], objectCentre[1], objectCentre[2], [1, 1, 1],
+                NewObjectLibrary.CreateRectangle(a, b, c, d, objectCentre[0], objectCentre[1], objectCentre[2],
+                                                 [1, 1, 1],
                                                  counterTexture)
 
                 NewObjectLibrary.sortVertices()
                 connectFound = False
-
-
 
         xypos = glfw.get_cursor_pos(window)
         xpos = xypos[0]

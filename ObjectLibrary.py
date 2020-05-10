@@ -1,6 +1,7 @@
 import numpy
 import math
 
+
 class ObjectLibrary:
     def __init__(self, textureNumber, vertexSize):
         self.VerticesList = [numpy.array([], dtype='float32'), numpy.array([], dtype='int32'), [], []]
@@ -13,7 +14,8 @@ class ObjectLibrary:
         self.textureNumber = textureNumber
 
     def returnVertices(self):
-        Result = [self.VerticesList, self.IndicesList, self.SortedIndicesList, self.TextureList, self.SortedTextureList, self.CompactTextureList]
+        Result = [self.VerticesList, self.IndicesList, self.SortedIndicesList, self.TextureList, self.SortedTextureList,
+                  self.CompactTextureList]
         return Result
 
     def returnVertexSize(self):
@@ -68,13 +70,20 @@ class ObjectLibrary:
         for j in range(low, high):
             if self.SortedTextureList[j] <= pivot:
                 i += 1
-                self.SortedTextureList[i], self.SortedTextureList[j] = self.SortedTextureList[j], self.SortedTextureList[i]
+                self.SortedTextureList[i], self.SortedTextureList[j] = self.SortedTextureList[j], \
+                                                                       self.SortedTextureList[i]
 
-                self.SortedIndicesList[3 * i], self.SortedIndicesList[3 * j] = self.SortedIndicesList[3 * j], self.SortedIndicesList[3 * i]
-                self.SortedIndicesList[3 * i + 1], self.SortedIndicesList[3 * j + 1] = self.SortedIndicesList[3 * j + 1], self.SortedIndicesList[3 * i + 1]
-                self.SortedIndicesList[3 * i + 2], self.SortedIndicesList[3 * j + 2] = self.SortedIndicesList[3 * j + 2], self.SortedIndicesList[3 * i + 2]
+                self.SortedIndicesList[3 * i], self.SortedIndicesList[3 * j] = self.SortedIndicesList[3 * j], \
+                                                                               self.SortedIndicesList[3 * i]
+                self.SortedIndicesList[3 * i + 1], self.SortedIndicesList[3 * j + 1] = self.SortedIndicesList[
+                                                                                           3 * j + 1], \
+                                                                                       self.SortedIndicesList[3 * i + 1]
+                self.SortedIndicesList[3 * i + 2], self.SortedIndicesList[3 * j + 2] = self.SortedIndicesList[
+                                                                                           3 * j + 2], \
+                                                                                       self.SortedIndicesList[3 * i + 2]
 
-        self.SortedTextureList[i + 1], self.SortedTextureList[high] = self.SortedTextureList[high], self.SortedTextureList[i + 1]
+        self.SortedTextureList[i + 1], self.SortedTextureList[high] = self.SortedTextureList[high], \
+                                                                      self.SortedTextureList[i + 1]
         return i + 1
 
     def quickSortIndexBuffer(self, low, high):
