@@ -95,33 +95,44 @@ class Game3D:
             for b in range(min(4, c_dist + 1)):
                 for c in range(min(4, h_dist + 1)):
                     (new_board, O) = self.copy_board(r_target, c_target, h_target, a, b, c, 3, 3, 3)
-                    if self.row_score(new_board, 4, 4, 4, O) == 1:  # If 4 are connected in a row
+                    (win, first, last) = self.row_score(new_board, 4, 4, 4, O)
+                    if win == 1:  # If 4 are connected in a row
                         return 1  # Win state
-                    if self.col_score(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.col_score(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.height_score(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.height_score(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score1(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score1(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score2(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score2(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score3(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score3(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score3(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score4(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score4(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score5(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score5(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.diagonal_score6(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.diagonal_score6(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.super_diagonal1(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.super_diagonal1(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.super_diagonal2(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.super_diagonal2(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.super_diagonal3(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
-                    if self.super_diagonal3(new_board, 4, 4, 4, O) == 1:
-                        return 1
-                    if self.super_diagonal4(new_board, 4, 4, 4, O) == 1:
+                    (win, first, last) = self.super_diagonal4(new_board, 4, 4, 4, O)
+                    if win == 1:
                         return 1
         return 0
 
