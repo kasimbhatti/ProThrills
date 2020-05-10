@@ -14,3 +14,7 @@ This game automatically connects you to another player who also runs the client 
 This game was intended to bring all th efun of a family connect 4 game, and virtually extend the range of players which can play with you. You could also get help with moves from your family and local community, in order to connect with them too.
 
 This game was intended to bring fun to those that play it, so we hope that you do!
+
+
+UPDATE:
+Due to time constraints, the server version of the game was not able to be completed, instead the game can be run locally on a single device by running the Main file. Python modules may need to be installed. We still think that playing thi sversion of the game will be  a fun activity between close family/those that you will love. And that the community will be enhanced because of it. Enjoy!
