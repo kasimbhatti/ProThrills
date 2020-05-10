@@ -17,4 +17,4 @@ This game was intended to bring fun to those that play it, so we hope that you d
 
 
 UPDATE:
-Due to time constraints, the server version of the game was not able to be completed, instead the game can be run locally on a single device by running the Main file. Python modules may need to be installed. We still think that playing thi sversion of the game will be  a fun activity between close family/those that you will love. And that the community will be enhanced because of it. Enjoy!
+Due to time constraints, the server version of the game was not able to be completed, instead the game can be run locally on a single device by running the Main file. Python modules may need to be installed. We still think that playing this version of the game will be  a fun activity between close family/those that you will love. And that the community will be enhanced because of it. Enjoy!
