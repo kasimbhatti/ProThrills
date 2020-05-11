@@ -9,4 +9,4 @@ To test our server, we have written a basic rock,paper,scissors game which anyon
 We plan to integrate this server and client code with our 3DConnect4 game code to allow users to play a 3D version of Connect4 with any player around the world, increasing the community aspect in gaming.
 
 Setup and run:
-Download all four .py files and run the client.py file
+Download all four .py files and run the client.py file. Python3 needs to be installed on the device.
